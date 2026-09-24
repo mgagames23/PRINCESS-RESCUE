@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Princess Rescue</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-app">
+
+        <!-- ========================================== -->
+        <!-- 1. YÜKLEME VE AÇILIŞ EKRANI (LOADING SCREEN) -->
+        <!-- ========================================== -->
+        <section id="screen-loading" class="screen active">
+            <div class="loading-content">
+                <img src="assets/characters/princess_elara.png" alt="Princess Elara" class="splash-character bounce-animation">
+                <h1 class="game-logo">Princess Rescue</h1>
+                <div class="progress-bar-container">
+                    <div id="loading-progress-bar" class="progress-fill"></div>
+                </div>
+                <p id="loading-text" class="status-text">Varlıklar yükleniyor...</p>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. ANA MENÜ EKRANI (MAIN MENU)             -->
+        <!-- ========================================== -->
+        <section id="screen-main-menu" class="screen">
+            <div class="menu-top-bar">
+                <div class="currency-badge">
+                    <img src="assets/tiles/12_gold_coin.png" alt="Coin">
+                    <span id="menu-coin-count">1,250</span>
+                </div>
+                <button id="btn-open-settings-menu" class="btn-icon">⚙️</button>
+            </div>
+
+            <div class="menu-hero">
+                <img src="assets/characters/knight_aras.png" alt="Knight Aras" class="hero-left">
+                <div class="title-container">
+                    <h1 class="main-title">Princess<br><span>Rescue</span></h1>
+                </div>
+                <img src="assets/characters/morvak.png" alt="Morvak" class="hero-right">
+            </div>
+
+            <div class="menu-controls">
+                <button id="btn-play-main" class="btn-action primary pulse-animation">
+                    <span>OYNA</span>
+                </button>
+                <div class="secondary-buttons">
+                    <button id="btn-open-shop" class="btn-action secondary">
+                        <img src="assets/tiles/17_treasure_chest.png" alt="Shop"> MAĞAZA
+                    </button>
+                    <button id="btn-open-daily" class="btn-action secondary">
+                        <img src="assets/tiles/13_star.png" alt="Daily"> GÜNLÜK ÖDÜL
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. DÜNYA HARİTASI VE BÖLÜM SEÇİMİ (MAP)   -->
+        <!-- ========================================== -->
+        <section id="screen-world-map" class="screen">
+            <header class="map-header">
+                <button id="btn-map-to-menu" class="btn-icon-back">⬅</button>
+                <div class="world-title-badge">
+                    <h2 id="world-title-text">Dünya 1: Krallık Ormanı</h2>
+                </div>
+                <div class="currency-badge">
+                    <img src="assets/tiles/12_gold_coin.png" alt="Coin">
+                    <span id="map-coin-count">1,250</span>
+                </div>
+            </header>
+
+            <main id="world-map-viewport" class="map-viewport">
+                <!-- Arka plan resmi JS ile dinamik eklenecek -->
+                <div id="map-background-layer" class="map-bg-layer"></div>
+                
+                <!-- Bölüm Node'ları JS tarafından buraya basılacak -->
+                <div id="level-nodes-layer" class="map-nodes-layer"></div>
+
+                <!-- Yol Üzerindeki Karakter Görseli -->
+                <div id="player-avatar-node" class="player-map-avatar">
+                    <img src="assets/characters/knight_aras.png" alt="Player">
+                </div>
+            </main>
+
+            <footer class="map-footer-nav">
+                <button id="btn-prev-world" class="btn-nav-world">◀ Önceki Dünya</button>
+                <div class="world-indicator-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <button id="btn-next-world" class="btn-nav-world">Sonraki Dünya ▶</button>
+            </footer>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 4. OYUN İÇİ ARAYÜZÜ (GAMEPLAY SCREEN)      -->
+        <!-- ========================================== -->
+        <section id="screen-gameplay" class="screen">
+            <!-- Üst Bilgi Barı (HUD) -->
+            <header class="game-hud">
+                <button id="btn-pause-game" class="btn-icon">⏸</button>
+
+                <div class="hud-box level-info">
+                    <span class="label">Bölüm</span>
+                    <span id="hud-level-num" class="value">1-1</span>
+                </div>
+
+                <div class="hud-box moves-info">
+                    <span class="label">Kalan Hamle</span>
+                    <span id="hud-moves-left" class="value highlight">20</span>
+                </div>
+
+                <div class="hud-box score-info">
+                    <span class="label">Puan</span>
+                    <span id="hud-score-value" class="value">0</span>
+                </div>
+            </header>
+
+            <!-- Karakter / Hikaye Barı -->
+            <div class="story-banner">
+                <img id="game-character-left" src="assets/characters/fairy_luna.png" alt="Guide" class="char-thumb">
+                <div id="character-dialogue-bubble" class="speech-bubble">
+                    Taşları eşleştirerek Pofuduk'u kurtarmama yardım et!
+                </div>
+            </div>
+
+            <!-- Match-3 Tahta Alanı -->
+            <main id="gameboard-wrapper" class="board-wrapper">
+                <div id="grid-board" class="match3-grid">
+                    <!-- 8x8 Tile hücreleri JS ile dinamik yerleştirilecek -->
+                </div>
+            </main>
+
+            <!-- Alt Güçlendirici (Booster) Barı -->
+            <footer class="booster-bar">
+                <button class="booster-item" data-booster="hammer">
+                    <img src="assets/tiles/02_sword.png" alt="Çekiç">
+                    <span class="booster-count">3</span>
+                </button>
+                <button class="booster-item" data-booster="bomb">
+                    <img src="assets/tiles/11_magic_potion.png" alt="Bomba">
+                    <span class="booster-count">1</span>
+                </button>
+                <button class="booster-item" data-booster="rainbow">
+                    <img src="assets/tiles/15_magic_orb.png" alt="Renk Bombası">
+                    <span class="booster-count">2</span>
+                </button>
+            </footer>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 5. POPUP / MODALLAR (OVERLAYS)             -->
+        <!-- ========================================== -->
+
+        <!-- PAUSE (DURAKLATMA) MODALI -->
+        <div id="modal-pause" class="modal-overlay">
+            <div class="modal-box">
+                <h3 class="modal-title">Oyun Duraklatıldı</h3>
+                <div class="modal-actions">
+                    <button id="btn-resume-game" class="btn-action primary">Devam Et</button>
+                    <button id="btn-restart-level" class="btn-action secondary">Yeniden Başlat</button>
+                    <button id="btn-quit-to-map" class="btn-action danger">Haritaya Dön</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- WIN (BÖLÜM KAZANMA) MODALI -->
+        <div id="modal-win" class="modal-overlay">
+            <div class="modal-box win-card">
+                <img src="assets/characters/king_alaric.png" alt="King Alaric" class="modal-avatar">
+                <h2>Bölüm Tamamlandı!</h2>
+                <div class="stars-container">
+                    <span class="star-icon active">⭐</span>
+                    <span class="star-icon active">⭐</span>
+                    <span class="star-icon active">⭐</span>
+                </div>
+                <div class="reward-summary">
+                    <p>Kazanılan Altın: <span id="win-gold-amount">+50</span> 💰</p>
+                </div>
+                <button id="btn-win-next" class="btn-action primary">Sonraki Bölüm</button>
+            </div>
+        </div>
+
+        <!-- LOSE (BÖLÜM KAYBETME) MODALI -->
+        <div id="modal-lose" class="modal-overlay">
+            <div class="modal-box lose-card">
+                <img src="assets/characters/witch_nyx.png" alt="Witch Nyx" class="modal-avatar">
+                <h2>Hamleniz Bitti!</h2>
+                <p>Prensesi kurtarmak için tekrar denemelisin.</p>
+                <div class="modal-actions">
+                    <button id="btn-lose-retry" class="btn-action primary">Tekrar Dene</button>
+                    <button id="btn-lose-map" class="btn-action secondary">Harita</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AYARLAR (SETTINGS) MODALI -->
+        <div id="modal-settings" class="modal-overlay">
+            <div class="modal-box">
+                <h3>Ayarlar</h3>
+                <div class="setting-row">
+                    <span>Müzik Ses Seviyesi</span>
+                    <input type="range" id="slider-music" min="0" max="100" value="80">
+                </div>
+                <div class="setting-row">
+                    <span>Ses Efektleri (SFX)</span>
+                    <input type="range" id="slider-sfx" min="0" max="100" value="100">
+                </div>
+                <button id="btn-close-settings" class="btn-action primary">Kaydet ve Kapat</button>
+            </div>
+        </div>
+
+        <!-- MAĞAZA (SHOP) MODALI -->
+        <div id="modal-shop" class="modal-overlay">
+            <div class="modal-box large">
+                <div class="modal-header">
+                    <h3>Krallık Mağazası</h3>
+                    <button id="btn-close-shop" class="close-x">✖</button>
+                </div>
+                <div class="shop-items-grid">
+                    <div class="shop-item">
+                        <img src="assets/tiles/17_treasure_chest.png" alt="Chest">
+                        <h4>Küçük Hazine</h4>
+                        <p>500 Altın</p>
+                        <button class="btn-buy-pack" data-cost="0.99">$0.99</button>
+                    </div>
+                    <div class="shop-item">
+                        <img src="assets/tiles/11_magic_potion.png" alt="Boosters">
+                        <h4>İksir Paketi</h4>
+                        <p>5x Bomba</p>
+                        <button class="btn-buy-pack" data-cost="100">100 Altın</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- OYUN SCRIPT DOSYASI -->
+    <script src="game.js"></script>
+</body>
+</html>
