@@ -139,19 +139,9 @@
             </main>
 
             <!-- Alt Güçlendirici (Booster) Barı -->
-            <footer class="booster-bar">
-                <button class="booster-item" data-booster="hammer">
-                    <img src="assets/tiles/02_sword.png" alt="Çekiç">
-                    <span class="booster-count">3</span>
-                </button>
-                <button class="booster-item" data-booster="bomb">
-                    <img src="assets/tiles/11_magic_potion.png" alt="Bomba">
-                    <span class="booster-count">1</span>
-                </button>
-                <button class="booster-item" data-booster="rainbow">
-                    <img src="assets/tiles/15_magic_orb.png" alt="Renk Bombası">
-                    <span class="booster-count">2</span>
-                </button>
+            <!-- JS (game.js) içerisindeki renderBoosterUI() fonksiyonu booster_hammer.png, booster_bomb.png vb. ikonları ve rozetleri doğrudan bu kapsayıcıya basar -->
+            <footer id="hud-boosters-bar" class="booster-bar">
+                <!-- JS tarafından dinamik olarak doldurulacaktır -->
             </footer>
         </section>
 
