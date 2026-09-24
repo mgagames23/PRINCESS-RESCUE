@@ -1,0 +1,61 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Install Dependencies & Capacitor
+        run: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
+          npx cap init "Princess Rescue" "com.princessrescue.game" --web-dir .
+
+      - name: Add Android Platform
+        run: |
+          npx cap add android
+
+      - name: Generate App Icons from Assets
+        run: |
+          # Icon ve Splash generation scripti
+          mkdir -p assets-generate
+          cp princess_rescue_icon.png assets-generate/icon.png
+          # Standart ikon üretimi
+          npx @capacitor/assets generate --iconBackgroundColor '#1a1a2e' --iconBackgroundColorDark '#1a1a2e'
+
+      - name: Sync Capacitor Project
+        run: |
+          npx cap sync android
+
+      - name: Build Android APK with Gradle
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Princess-Rescue-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
