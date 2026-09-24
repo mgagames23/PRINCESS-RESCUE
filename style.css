@@ -548,20 +548,20 @@ body, html {
     animation: popAndDisappear 0.25s forwards ease-in;
 }
 
-/* BOOSTER BAR */
+/* BOOSTER BAR & DYNAMIC ITEMS */
 .booster-bar {
     width: 100%;
     padding: 12px 20px;
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 15px;
     background: rgba(15, 12, 32, 0.6);
 }
 
 .booster-item {
     position: relative;
-    width: 54px;
-    height: 54px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: var(--panel-bg);
     border: 2px solid var(--glass-border);
@@ -570,12 +570,31 @@ body, html {
     align-items: center;
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.booster-item:active {
+    transform: scale(0.92);
+}
+
+.booster-item.selected {
+    border-color: var(--accent-color);
+    background: rgba(245, 208, 97, 0.25);
+    box-shadow: 0 0 15px var(--accent-color);
+    transform: scale(1.08);
+}
+
+.booster-item.disabled {
+    opacity: 0.5;
+    filter: grayscale(80%);
+    cursor: not-allowed;
 }
 
 .booster-item img {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
 }
 
 .booster-count {
@@ -584,15 +603,17 @@ body, html {
     right: -2px;
     background: var(--primary-color);
     color: #fff;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 800;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 4px;
+    border-radius: 11px;
     display: flex;
     justify-content: center;
     align-items: center;
     border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 /* ========================================== */
@@ -732,7 +753,7 @@ body, html {
 }
 
 /* ========================================== */
-/* 8. EFOKTLER VE ANİMASYONLAR                */
+/* 8. EFEKTLER VE ANİMASYONLAR                */
 /* ========================================== */
 @keyframes bounce {
     0%, 100% { transform: translateY(0); }
