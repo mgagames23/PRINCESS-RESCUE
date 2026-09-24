@@ -1,7 +1,7 @@
 {
   "appId": "com.princessrescue.game",
   "appName": "Princess Rescue",
-  "webDir": ".",
+  "webDir": "www",
   "bundledWebRuntime": false,
   "server": {
     "androidScheme": "https"
