@@ -231,79 +231,147 @@ class GameController {
     }
 
     bindEvents() {
+        // Yardımcı Güvenli Etkinlik Bağlayıcı
+        const bind = (id, event, handler) => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener(event, handler);
+        };
+
         // Ana Menü
-        document.getElementById('btn-play-main').addEventListener('click', () => {
+        bind('btn-play-main', 'click', () => {
             this.audio.play('click');
             this.openWorldMap(this.userData.currentWorld);
         });
 
-        document.getElementById('btn-open-settings-menu').addEventListener('click', () => {
+        bind('btn-open-settings-menu', 'click', () => {
             this.audio.play('button');
             this.toggleModal('modal-settings', true);
         });
 
-        document.getElementById('btn-close-settings').addEventListener('click', () => {
+        bind('btn-close-settings', 'click', () => {
             this.audio.play('button');
             this.toggleModal('modal-settings', false);
         });
 
-        document.getElementById('btn-open-shop').addEventListener('click', () => {
+        bind('btn-open-shop', 'click', () => {
             this.audio.play('button');
             this.toggleModal('modal-shop', true);
         });
 
-        document.getElementById('btn-close-shop').addEventListener('click', () => {
+        bind('btn-close-shop', 'click', () => {
             this.audio.play('button');
             this.toggleModal('modal-shop', false);
         });
 
         // Harita Navigasyonu
-        document.getElementById('btn-map-to-menu').addEventListener('click', () => {
+        bind('btn-map-to-menu', 'click', () => {
             this.audio.play('click');
             this.switchScreen('screen-main-menu');
         });
 
-        document.getElementById('btn-prev-world').addEventListener('click', () => {
+        bind('btn-prev-world', 'click', () => {
             if (this.currentWorld > 1) this.openWorldMap(this.currentWorld - 1);
         });
 
-        document.getElementById('btn-next-world').addEventListener('click', () => {
+        bind('btn-next-world', 'click', () => {
             if (this.currentWorld < GAME_CONFIG.TOTAL_WORLDS) this.openWorldMap(this.currentWorld + 1);
         });
 
         // Oyun İçi HUD
-        document.getElementById('btn-pause-game').addEventListener('click', () => {
+        bind('btn-pause-game', 'click', () => {
             this.audio.play('button');
             this.toggleModal('modal-pause', true);
         });
 
-        document.getElementById('btn-resume-game').addEventListener('click', () => {
+        bind('btn-resume-game', 'click', () => {
             this.audio.play('button');
             this.toggleModal('modal-pause', false);
         });
 
-        document.getElementById('btn-quit-to-map').addEventListener('click', () => {
+        bind('btn-quit-to-map', 'click', () => {
             this.audio.play('button');
             this.toggleModal('modal-pause', false);
             this.openWorldMap(this.currentWorld);
         });
 
         // Modallar
-        document.getElementById('btn-win-next').addEventListener('click', () => {
+        bind('btn-win-next', 'click', () => {
             this.audio.play('click');
             this.toggleModal('modal-win', false);
             this.openWorldMap(this.userData.currentWorld);
         });
 
-        document.getElementById('btn-lose-retry').addEventListener('click', () => {
+        bind('btn-lose-retry', 'click', () => {
             this.audio.play('click');
             this.toggleModal('modal-lose', false);
             this.startLevel(this.currentWorld, this.currentLevel);
         });
 
         // Ses Ayarları Sliders
-        document.getElementById('slider-sfx').addEventListener('input', (e) => {
+        bind('slider-sfx', 'input', (e) => {
             this.audio.setSFXVolume(e.target.value);
+        });
+
+        bind('slider-music', 'input', (e) => {
+            this.audio.setMusicVolume(e.target.value);
+        });
+
+        // Günlük Ödül & Mağaza Modalları Düğmeleri
+        bind('btn-open-daily', 'click', () => {
+            this.audio.play('button');
+            this.toggleModal('modal-daily', true);
+        });
+
+        bind('btn-close-daily', 'click', () => {
+            this.audio.play('button');
+            this.toggleModal('modal-daily', false);
+        });
+
+        bind('btn-claim-daily', 'click', () => {
+            this.audio.play('daily_reward');
+            this.userData.coins += 100;
+            StorageManager.saveProgress(this.userData);
+            this.updateCurrencies();
+            this.toggleModal('modal-daily', false);
+        });
+
+        // Haritadaki ekstra Ayarlar/Mağaza Düğmeleri
+        bind('btn-open-settings-map', 'click', () => {
+            this.audio.play('button');
+            this.toggleModal('modal-settings', true);
+        });
+
+        bind('btn-open-shop-map', 'click', () => {
+            this.audio.play('button');
+            this.toggleModal('modal-shop', true);
+        });
+
+        // Oyun İçi Yeniden Başlat Düğmesi
+        bind('btn-restart-game', 'click', () => {
+            this.audio.play('button');
+            this.toggleModal('modal-pause', false);
+            this.startLevel(this.currentWorld, this.currentLevel);
+        });
+
+        // Geliştirici / Hile Araçları (Dev Tools)
+        bind('btn-dev-win', 'click', () => {
+            this.score = GAME_CONFIG.WIN_SCORE_BASE + (this.currentLevel * 100);
+            this.toggleModal('modal-pause', false);
+            this.checkLevelStatus();
+        });
+
+        bind('btn-dev-add-coins', 'click', () => {
+            this.userData.coins += 500;
+            StorageManager.saveProgress(this.userData);
+            this.updateCurrencies();
+            this.audio.play('coin');
+        });
+
+        bind('btn-reset-progress', 'click', () => {
+            if (confirm("Tüm ilerlemeniz sıfırlanacak. Emin misiniz?")) {
+                localStorage.removeItem('princess_rescue_save');
+                location.reload();
+            }
         });
 
         // Booster Tıklamaları
@@ -330,8 +398,13 @@ class GameController {
     }
 
     updateCurrencies() {
-        document.getElementById('menu-coin-count').innerText = this.userData.coins.toLocaleString();
-        document.getElementById('map-coin-count').innerText = this.userData.coins.toLocaleString();
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val;
+        };
+        const coinsFormatted = this.userData.coins.toLocaleString();
+        setVal('menu-coin-count', coinsFormatted);
+        setVal('map-coin-count', coinsFormatted);
     }
 
     openWorldMap(worldId) {
@@ -339,16 +412,18 @@ class GameController {
         this.switchScreen('screen-world-map');
 
         const info = GAME_CONFIG.WORLDS_INFO[worldId];
-        document.getElementById('world-title-text').innerText = info.name;
+        const titleEl = document.getElementById('world-title-text');
+        if (titleEl) titleEl.innerText = info.name;
 
         const bgLayer = document.getElementById('map-background-layer');
-        bgLayer.style.backgroundImage = `url('assets/maps/world${worldId}/world${worldId}_bg.png')`;
+        if (bgLayer) bgLayer.style.backgroundImage = `url('assets/maps/world${worldId}/world${worldId}_bg.png')`;
 
         this.renderMapNodes(worldId);
     }
 
     renderMapNodes(worldId) {
         const nodesContainer = document.getElementById('level-nodes-layer');
+        if (!nodesContainer) return;
         nodesContainer.innerHTML = '';
 
         for (let l = 1; l <= GAME_CONFIG.LEVELS_PER_WORLD; l++) {
@@ -379,12 +454,20 @@ class GameController {
         this.score = 0;
 
         const info = GAME_CONFIG.WORLDS_INFO[worldId];
-        document.getElementById('hud-level-num').innerText = `${worldId}-${levelId}`;
-        document.getElementById('hud-moves-left').innerText = this.movesLeft;
-        document.getElementById('hud-score-value').innerText = this.score;
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val;
+        };
 
-        document.getElementById('game-character-left').src = info.char;
-        document.getElementById('character-dialogue-bubble').innerText = info.dialogue;
+        setVal('hud-level-num', `${worldId}-${levelId}`);
+        setVal('hud-moves-left', this.movesLeft);
+        setVal('hud-score-value', this.score);
+
+        const charImg = document.getElementById('game-character-left');
+        if (charImg) charImg.src = info.char;
+
+        const dialogue = document.getElementById('character-dialogue-bubble');
+        if (dialogue) dialogue.innerText = info.dialogue;
 
         this.engine.setupWorldPool(worldId);
         this.engine.initGrid();
@@ -394,6 +477,7 @@ class GameController {
 
     renderBoard() {
         const gridEl = document.getElementById('grid-board');
+        if (!gridEl) return;
         gridEl.innerHTML = '';
 
         for (let r = 0; r < GAME_CONFIG.ROWS; r++) {
@@ -459,7 +543,8 @@ class GameController {
             this.renderBoard();
         } else {
             this.movesLeft--;
-            document.getElementById('hud-moves-left').innerText = this.movesLeft;
+            const movesEl = document.getElementById('hud-moves-left');
+            if (movesEl) movesEl.innerText = this.movesLeft;
             await this.handleCascades();
             this.checkLevelStatus();
         }
@@ -489,7 +574,8 @@ class GameController {
                 }
             }
 
-            document.getElementById('hud-score-value').innerText = this.score;
+            const scoreEl = document.getElementById('hud-score-value');
+            if (scoreEl) scoreEl.innerText = this.score;
             await new Promise(res => setTimeout(res, 250));
 
             // Yerçekimi Uygula
