@@ -12,54 +12,77 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Projeyi indir
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # 2. Node.js
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
+      # 3. Java
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: zulu
           java-version: 21
 
+      # 4. Bağımlılıkları yükle
       - name: Install Dependencies
-        run: npm install
+        run: |
+          npm install
+          npm install -D @capacitor/assets
 
+      # 5. Proje dosyalarını kontrol et
       - name: Verify Project
         run: |
-          echo "Project files:"
+          echo "=== Project ==="
           ls -la
 
-          echo "Web files:"
+          echo "=== WWW ==="
           find www -maxdepth 2 -type f | sort
 
-          echo "Capacitor config:"
+          echo "=== Capacitor Config ==="
           cat capacitor.config.json
 
-      - name: Add Android Platform
-        run: npx cap add android
+          echo "=== Icon Source ==="
+          if [ -f assets/icon.png ]; then
+            echo "assets/icon.png bulundu."
+          else
+            echo "HATA: assets/icon.png bulunamadı!"
+            exit 1
+          fi
 
-      - name: Generate App Icons
+      # 6. Android projesini oluştur
+      - name: Add Android Platform
+        run: |
+          npx cap add android
+
+      # 7. Android ikonları ve splash screen oluştur
+      - name: Generate App Icons and Splash
         run: |
           npx @capacitor/assets generate \
             --iconBackgroundColor '#1a1a2e' \
             --iconBackgroundColorDark '#1a1a2e'
 
-      - name: Sync Capacitor Project
-        run: npx cap sync android
+      # 8. Capacitor'u Android ile senkronize et
+      - name: Sync Capacitor
+        run: |
+          npx cap sync android
 
+      # 9. APK oluştur
       - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
+      # 10. APK'yı GitHub Actions'a yükle
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Princess-Rescue-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
