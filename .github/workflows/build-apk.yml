@@ -23,26 +23,39 @@ jobs:
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '21'
+          distribution: zulu
+          java-version: 21
 
-      - name: Install Dependencies & Capacitor
+      - name: Install Dependencies
         run: |
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
-          npx cap init "Princess Rescue" "com.princessrescue.game" --web-dir .
+
+      - name: Prepare Web Files
+        run: |
+          mkdir -p www
+          cp index.html www/
+          cp game.js www/
+          cp style.css www/
+          cp princess_rescue_icon.png www/
+          cp -r assets www/
+          cp -r sfx www/
+
+      - name: Verify Capacitor Config
+        run: |
+          cat capacitor.config.json
+          echo "Web files:"
+          find www -maxdepth 2 -type f | sort
 
       - name: Add Android Platform
         run: |
           npx cap add android
 
-      - name: Generate App Icons from Assets
+      - name: Generate App Icons
         run: |
-          # Icon ve Splash generation scripti
-          mkdir -p assets-generate
-          cp princess_rescue_icon.png assets-generate/icon.png
-          # Standart ikon üretimi
-          npx @capacitor/assets generate --iconBackgroundColor '#1a1a2e' --iconBackgroundColorDark '#1a1a2e'
+          npx @capacitor/assets generate \
+            --iconBackgroundColor '#1a1a2e' \
+            --iconBackgroundColorDark '#1a1a2e'
 
       - name: Sync Capacitor Project
         run: |
