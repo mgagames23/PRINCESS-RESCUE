@@ -27,29 +27,21 @@ jobs:
           java-version: 21
 
       - name: Install Dependencies
-        run: |
-          npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
+        run: npm install
 
-      - name: Prepare Web Files
+      - name: Verify Project
         run: |
-          mkdir -p www
-          cp index.html www/
-          cp game.js www/
-          cp style.css www/
-          cp princess_rescue_icon.png www/
-          cp -r assets www/
-          cp -r sfx www/
+          echo "Project files:"
+          ls -la
 
-      - name: Verify Capacitor Config
-        run: |
-          cat capacitor.config.json
           echo "Web files:"
           find www -maxdepth 2 -type f | sort
 
+          echo "Capacitor config:"
+          cat capacitor.config.json
+
       - name: Add Android Platform
-        run: |
-          npx cap add android
+        run: npx cap add android
 
       - name: Generate App Icons
         run: |
@@ -58,10 +50,9 @@ jobs:
             --iconBackgroundColorDark '#1a1a2e'
 
       - name: Sync Capacitor Project
-        run: |
-          npx cap sync android
+        run: npx cap sync android
 
-      - name: Build Android APK with Gradle
+      - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
