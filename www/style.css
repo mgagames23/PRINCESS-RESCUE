@@ -1189,10 +1189,12 @@ button {
 
     aspect-ratio: 1 / 1;
 
-    margin:
-        auto
-        auto
-        7px;
+    /* Önceden alt kenar sabit 7px'ti; bu, üstteki boşluğun
+       tamamının hud ile board arasında birikmesine ve board'un
+       booster satırına yapışık kalmasına yol açıyordu. Alt
+       kenarı da "auto" yaparak boşluk üst/alta eşit dağılıyor,
+       board her ekran boyutunda gerçek anlamda ortalanıyor. */
+    margin: auto;
 
     padding: 7px;
 
