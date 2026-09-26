@@ -1650,6 +1650,33 @@ button {
 }
 
 
+
+
+/* ========================================== */
+/* WIN / LOSE RESULT SCREENS */
+/* ========================================== */
+
+.win-card,
+.lose-card {
+    width: min(94vw, 620px);
+    padding: 10px;
+    gap: 10px;
+}
+
+.win-card .modal-ui-art,
+.lose-card .modal-ui-art {
+    width: 100%;
+    height: auto;
+    max-height: calc(92vh - 95px);
+    object-fit: contain;
+    margin: 0 auto;
+}
+
+.win-card .btn-action,
+.lose-card .btn-action {
+    width: 100%;
+}
+
 /* ========================================== */
 /* SETTINGS */
 /* ========================================== */

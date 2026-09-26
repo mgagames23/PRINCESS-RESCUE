@@ -301,6 +301,8 @@ class StorageManager {
 
             selectedCharacter: "knight_aras",
 
+            characterSelected: false,
+
             completedLevels: {},
 
             stars: {},
@@ -1222,6 +1224,16 @@ class GameController {
 
                 this.audio.play("click");
 
+                if (!this.userData.characterSelected) {
+
+                    this.openCharacterSelection(
+                        this.userData.currentWorld,
+                        this.userData.currentLevel
+                    );
+
+                    return;
+                }
+
                 this.openWorldMap(
                     this.userData.currentWorld
                 );
@@ -1399,6 +1411,16 @@ class GameController {
                 const pending =
                     this.pendingLevel;
 
+                this.userData.selectedCharacter =
+                    this.selectedCharacter;
+
+                this.userData.characterSelected =
+                    true;
+
+                StorageManager.saveProgress(
+                    this.userData
+                );
+
                 this.pendingLevel = null;
 
                 this.toggleModal(
@@ -1511,26 +1533,6 @@ class GameController {
 
 
         /* Lose */
-
-        bind(
-            "btn-lose-retry",
-            "click",
-            () => {
-
-                this.audio.play("click");
-
-                this.toggleModal(
-                    "modal-lose",
-                    false
-                );
-
-                this.launchLevel(
-                    this.currentWorld,
-                    this.currentLevel
-                );
-            }
-        );
-
 
         bind(
             "btn-lose-map",
@@ -1970,7 +1972,17 @@ class GameController {
                             "click"
                         );
 
-                        this.openCharacterSelection(
+                        if (!this.userData.characterSelected) {
+
+                            this.openCharacterSelection(
+                                worldId,
+                                level
+                            );
+
+                            return;
+                        }
+
+                        this.launchLevel(
                             worldId,
                             level
                         );
@@ -2093,13 +2105,6 @@ class GameController {
 
                         this.selectedCharacter =
                             character.id;
-
-                        this.userData.selectedCharacter =
-                            character.id;
-
-                        StorageManager.saveProgress(
-                            this.userData
-                        );
 
                         this.renderCharacterSelection();
                     }
@@ -2270,21 +2275,8 @@ class GameController {
         }
 
 
-        const small =
-            document.getElementById(
-                "game-character-left"
-            );
-
-
-        if (small) {
-
-            small.src =
-                character.image;
-
-            small.alt =
-                character.name;
-        }
-
+        // Match Tile ekranında sol karakter ve diyalog alanı kaldırıldı.
+        // Sağ üstteki seçilen karakter görseli korunuyor.
 
         const backdrop =
             document.getElementById(
@@ -2299,32 +2291,6 @@ class GameController {
 
             backdrop.alt =
                 character.name;
-        }
-
-
-        const name =
-            document.getElementById(
-                "story-character-name"
-            );
-
-
-        if (name) {
-
-            name.innerText =
-                character.name;
-        }
-
-
-        const dialogue =
-            document.getElementById(
-                "character-dialogue-bubble"
-            );
-
-
-        if (dialogue) {
-
-            dialogue.innerText =
-                info.dialogue;
         }
     }
 
@@ -3436,19 +3402,6 @@ class GameController {
 
 
             this.updateCurrencies();
-
-
-            const reward =
-                document.getElementById(
-                    "win-gold-amount"
-                );
-
-
-            if (reward) {
-
-                reward.innerText =
-                    `+${GAME_CONFIG.LEVEL_REWARD}`;
-            }
 
 
             this.toggleModal(
