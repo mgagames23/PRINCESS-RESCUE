@@ -167,6 +167,39 @@ const GAME_CONFIG = {
 };
 
 
+// Harita üzerindeki bölüm düğümlerinin (level-node) konumları.
+// Hem düğümleri çizen renderMapNodes hem de oyuncu karakterini
+// haritada doğru bölüm numarasına yerleştiren updateMapAvatar
+// aynı listeyi kullanır; böylece ikisi birbirinden kopmaz.
+const MAP_NODE_POSITIONS = [
+
+    {
+        x: 50,
+        y: 86
+    },
+
+    {
+        x: 43,
+        y: 67
+    },
+
+    {
+        x: 51,
+        y: 48
+    },
+
+    {
+        x: 43,
+        y: 28
+    },
+
+    {
+        x: 51,
+        y: 9
+    }
+];
+
+
 /* ========================================== */
 /* AUDIO */
 /* ========================================== */
@@ -574,6 +607,13 @@ class Match3Engine {
 
         let count = 0;
 
+        // En uzun tekil grup (yatay ya da dikey) uzunluğu.
+        // Aynı anda birden fazla ayrı eşleşme grubu oluşsa bile
+        // (ör. iki ayrı 3'lü grup ya da L/T şekli), ses efekti
+        // toplam tile sayısına değil, tek bir sıradaki en uzun
+        // gruba göre seçilmeli.
+        let maxGroupLength = 0;
+
 
         /*
          * Yatay
@@ -609,6 +649,12 @@ class Match3Engine {
                 const length = end - c;
 
                 if (length >= 3) {
+
+                    maxGroupLength =
+                        Math.max(
+                            maxGroupLength,
+                            length
+                        );
 
                     for (
                         let x = c;
@@ -665,6 +711,12 @@ class Match3Engine {
 
                 if (length >= 3) {
 
+                    maxGroupLength =
+                        Math.max(
+                            maxGroupLength,
+                            length
+                        );
+
                     for (
                         let y = r;
                         y < end;
@@ -687,7 +739,8 @@ class Match3Engine {
         return {
             hasMatch: count > 0,
             matched,
-            count
+            count,
+            maxGroupLength
         };
     }
 
@@ -1841,23 +1894,90 @@ class GameController {
                 "player-map-avatar-img"
             );
 
-        if (!avatar) {
+        if (avatar) {
+
+            const character =
+                GAME_CONFIG.CHARACTERS.find(
+                    item =>
+                        item.id ===
+                        this.selectedCharacter
+                );
+
+
+            if (character) {
+
+                avatar.src =
+                    character.image;
+            }
+        }
+
+
+        // Karakter simgesi, açık olan dünyadaki ilerlemeye göre
+        // haritada DOĞRU bölüm numarasının üzerinde durmalı.
+        // Önceden bu konum hiç güncellenmiyordu; sadece CSS'teki
+        // sabit başlangıç konumunda (1. bölüm) kalıyordu.
+
+        const avatarNode =
+            document.getElementById(
+                "player-avatar-node"
+            );
+
+        if (!avatarNode) {
             return;
         }
 
 
-        const character =
-            GAME_CONFIG.CHARACTERS.find(
-                item =>
-                    item.id ===
-                    this.selectedCharacter
+        let targetLevel;
+
+        if (
+            this.currentWorld <
+            this.userData.currentWorld
+        ) {
+
+            // Bu dünya tamamen bitirilmiş: son bölümde göster.
+            targetLevel =
+                GAME_CONFIG.LEVELS_PER_WORLD;
+        }
+
+        else if (
+            this.currentWorld ===
+            this.userData.currentWorld
+        ) {
+
+            // Şu an ilerlenen dünya: sıradaki/son açılan bölüm.
+            targetLevel =
+                this.userData.currentLevel;
+        }
+
+        else {
+
+            // Henüz erişilmemiş bir dünya: başlangıçta göster.
+            targetLevel = 1;
+        }
+
+
+        targetLevel =
+            Math.max(
+                1,
+                Math.min(
+                    GAME_CONFIG.LEVELS_PER_WORLD,
+                    targetLevel
+                )
             );
 
 
-        if (character) {
+        const pos =
+            MAP_NODE_POSITIONS[
+                targetLevel - 1
+            ];
 
-            avatar.src =
-                character.image;
+        if (pos) {
+
+            avatarNode.style.left =
+                `${pos.x}%`;
+
+            avatarNode.style.top =
+                `${pos.y}%`;
         }
     }
 
@@ -1875,35 +1995,6 @@ class GameController {
 
 
         container.innerHTML = "";
-
-
-        const positions = [
-
-            {
-                x: 50,
-                y: 86
-            },
-
-            {
-                x: 43,
-                y: 67
-            },
-
-            {
-                x: 51,
-                y: 48
-            },
-
-            {
-                x: 43,
-                y: 28
-            },
-
-            {
-                x: 51,
-                y: 9
-            }
-        ];
 
 
         for (
@@ -1952,7 +2043,7 @@ class GameController {
 
 
             const pos =
-                positions[level - 1];
+                MAP_NODE_POSITIONS[level - 1];
 
 
             node.style.left =
@@ -2709,9 +2800,15 @@ class GameController {
             const count =
                 matchResult.count;
 
+            // Ses/animasyon kademesi, tahtadaki toplam tile
+            // sayısına değil, bu turda oluşan en uzun tekil
+            // gruba (yan yana gelen tile sayısına) göre seçilir.
+            const matchSize =
+                matchResult.maxGroupLength;
+
 
             this.audio.playMatch(
-                count
+                matchSize
             );
 
 
@@ -2772,9 +2869,9 @@ class GameController {
                         if (tiles[index]) {
 
                             tiles[index].classList.add(
-                                count >= 5
+                                matchSize >= 5
                                     ? "match-five"
-                                    : count === 4
+                                    : matchSize === 4
                                         ? "match-four"
                                         : "matched-pop"
                             );
@@ -2798,9 +2895,9 @@ class GameController {
 
 
             await this.sleep(
-                count >= 5
+                matchSize >= 5
                     ? 480
-                    : count === 4
+                    : matchSize === 4
                         ? 400
                         : 320
             );
